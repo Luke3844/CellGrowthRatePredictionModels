@@ -15,9 +15,17 @@ This project produces analyses of various degrees of nearest neighbor and polyno
 - scikit-learn 1.9.1
 
 ## Code Design 
-First the code imports the relevant packages and scans the dataset from the datasets folder. Then the parameters for the 
+### Imports
+First the code imports the relevant packages, classes, and functions. 
+Then it scans the dataset from the datasets folder. 
+It then takes the dataset and splits it into target (the first column, the specific growth rate) which becomes y and features (T, pH, glucose, lactate) which becomes x. 
+This stage is necessary because it sets up the functionality for the rest of the code and cuts the dataset into parts that can be read by the model training.
 
-At the end is the table generation, which takes the data generated from the model training and testing and outputs it into a legible format, allowing me (and any interested parties) to analyze the results.
+### Feature Subets
+
+
+### Table Generation
+At the end of the code is the table generation, which takes the data generated from the model training and testing and outputs it into a legible format, allowing me (and any interested parties) to analyze the results.
 This stage is necessary because otherwise there would be no way for an interested party to see the results and compare models.
 
 
