@@ -15,3 +15,8 @@ This project produces analyses of various degrees of nearest neighbor and polyno
 
 
 ## Analysis
+
+### Most Accurate Model
+
+
+### Model Applicability
