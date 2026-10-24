@@ -18,10 +18,12 @@ At the end is the table generation, which takes the data generated from the mode
 ## Analysis
 
 ### Most Accurate Model
-The most accurate model for predicting cell growth is . Reasonable alternatives are . The reason  is better is 
+The most accurate model for predicting cell growth is the kNN . Reasonable alternatives are . The reason  is better is 
 
 ### Conditions For Cell Growth
-High cell growth can be accomplished by .
+Increased cell growth can be accomplished by increasing the concentration of Glucose. 
+The second degree polynomial (the one with the least negative R2) for exclusively glucose is 0.2654 +0.0274*[Glucose] +0.0074*[Glucose]^2.
+Which implies a positive increase in specific growth rate in the presence of Glucose, which is to be expected as glucose is a carbon source for the cells to grow on.
 
 Inversely, low cell growth can be accomplished by .
 
