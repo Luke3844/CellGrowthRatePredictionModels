@@ -15,7 +15,6 @@ from sklearn.model_selection import cross_validate, GridSearchCV, train_test_spl
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
-from sympy import false
 
 import src.functions as sf  # This allows you to access functions from functions.py using sf.function_name()
 from src.classes import Batch  # This allows you to import individual Classes from classes.py
@@ -41,9 +40,9 @@ y_all = df.loc[:, targets].to_numpy()
 
 kwargs_gscv = dict(cv=4, scoring="neg_root_mean_squared_error", return_train_score=True)
 
-param_grid_poly = dict(polynomialfeatures__degree=[i for i in range(1, 21)])
+param_grid_poly = dict(polynomialfeatures__degree=[i for i in range(1, 6)])
 
-param_grid_knn = dict(kneighborsregressor__n_neighbors=[i for i in range(1, 21)],
+param_grid_knn = dict(kneighborsregressor__n_neighbors=[i for i in range(1, 10)],
                       kneighborsregressor__weights=["uniform", "distance"])
 
 ## Starting ##
@@ -54,7 +53,7 @@ lc_rmse_knn_train = []
 lc_rmse_poly_test = []
 lc_rmse_knn_test = []
 
-for n_samples in range(18, 318, 20):
+for n_samples in range(38, 318, 20):
     idxs = rng.choice(len(x_all), size=n_samples, replace=False)
     x = x_all[idxs]
     y = y_all[idxs]
@@ -63,13 +62,14 @@ for n_samples in range(18, 318, 20):
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=0)
 
     #GSCV for our polynomial models
-    model_poly = make_pipeline(StandardScaler(), PolynomialFeatures(include_bias = false), LinearRegression())
+    model_poly = make_pipeline(StandardScaler(), PolynomialFeatures(), LinearRegression())
     model_gscv_poly = GridSearchCV(model_poly, param_grid=param_grid_poly, **kwargs_gscv)
     model_gscv_poly.fit(x_train, y_train)
 
     #GSCV for knn models
     model_knn = make_pipeline(StandardScaler(), KNeighborsRegressor())
     model_gscv_knn = GridSearchCV(model_knn, param_grid = param_grid_knn, **kwargs_gscv)
+    model_gscv_knn.fit(x_train, y_train)
 
     #Training Computing
     rmse_poly_train = root_mean_squared_error(y_train, model_gscv_poly.predict(x_train))
