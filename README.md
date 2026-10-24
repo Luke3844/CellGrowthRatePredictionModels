@@ -60,14 +60,24 @@ The model is also appealing because as it is not parametric it does not need to 
 
 
 ### Conditions For Cell Growth
-Increased cell growth can be accomplished by increasing the concentration of Glucose. 
+Increased cell growth can be accomplished by increasing the concentration of Glucose, keeping lactate concentration low, and keeping temperature and pH close to optimal values. 
+
 The second degree polynomial (the one with the least negative R2) for exclusively glucose is 0.2654 +0.0274*[Glucose] +0.0074*[Glucose]^2.
 Which implies a positive increase in specific growth rate in the presence of Glucose, which is to be expected as glucose is a carbon source for the cells to grow on.
 
-Inversely, low cell growth can be accomplished by .
+Temperature
+This implies a positive increase in specific growth rate with an increased temperature up to a point and a decrease after, which is to be expected as cells typically grow faster at an optimal temperature and rapidly die above that temperature.
+
+pH
+What is implied is a positive increase in specific growth rate at the optimal pH and falling off the further it strays from optimal, which is expected behaviour for cells in varied pH environments.
+
+Lactate
+The data shows that the accumulation of lactate in the system has a negative effect on cell growth.
+
+Inversely, low cell growth can be accomplished by doing the opposite of the above. If, for some reason, low cell growth is desired, you could limit the glucose concentration, push the temperature and pH outside of their optimal regions, and increase the lactate concentration.
 
 ### Possible Model Applications
-The chosen model could be used in the prediction of cell growth rates for design of or operation of a bioreactor system using a cell which metabolized glucose into lactose.
+The chosen model could be used in the prediction of cell growth rates for design of or operation of a bioreactor system using a cell which metabolized glucose into lactate.
 
 
 ### Model Limits
