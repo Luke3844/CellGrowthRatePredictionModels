@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import root_mean_squared_error
-from sklearn.model_selection import cross_validate, GridSearchCV, train_test_split
+from sklearn.model_selection import cross_validate, train_test_split
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
@@ -39,9 +39,9 @@ y_all = df.loc[:, target_col].to_numpy()
 x_train, x_test, y_train, y_test = train_test_split(
     x_all, y_all, test_size=0.2, random_state=0)
 
-# ---------------------------------------------------------------------------
+# ==============
 # Feature subsets
-# ---------------------------------------------------------------------------
+# ==============
 def make_subsets(feature_cols, max_degree=5):
     n = len(feature_cols)
     out = []
@@ -59,12 +59,10 @@ def make_subsets(feature_cols, max_degree=5):
     out.append((list(range(n)), feature_cols, max_degree))
     return out
 
-# ---------------------------------------------------------------------------
-# Equation formatter — turns (intercept, coefs, powers) into one string
-# ---------------------------------------------------------------------------
+# ===========================
+# Equation formatter for table
+# ============================
 def format_equation(intercept, coefs, powers, subset_names):
-    """Return the fitted equation as a single-line string, e.g.
-       '0.4167 + 0.0181*[Glucose] + 0.0092*[Lactate] - 0.0234*[Glucose]^2 ...'"""
     parts = [f"{intercept:+.4f}"]
     for i in range(powers.shape[0]):
         term_parts = []
@@ -81,9 +79,9 @@ def format_equation(intercept, coefs, powers, subset_names):
         parts.append(f"{coefs[i]:+.4f}*{term}")
     return " ".join(parts)
 
-# ---------------------------------------------------------------------------
+# =================
 # Polynomial models
-# ---------------------------------------------------------------------------
+# =================
 poly_rows = []
 
 for subset_idx, subset_names, max_degree in make_subsets(feature_cols, max_degree=5):
@@ -98,9 +96,7 @@ for subset_idx, subset_names, max_degree in make_subsets(feature_cols, max_degre
             LinearRegression(),
         )
 
-        cv = cross_validate(model, x_train[:, subset_idx], y_train, cv=5,
-                            scoring=("neg_root_mean_squared_error", "r2"),
-                            return_train_score=True)
+        cv = cross_validate(model, x_train[:, subset_idx], y_train, cv=5, scoring=("neg_root_mean_squared_error", "r2"), return_train_score=True)
         rmse_tr_cv = -cv["train_neg_root_mean_squared_error"]
         rmse_te_cv = -cv["test_neg_root_mean_squared_error"]
         r2_tr_cv   =  cv["train_r2"]
@@ -136,9 +132,9 @@ for subset_idx, subset_names, max_degree in make_subsets(feature_cols, max_degre
             r2_test_cv_sd    = r2_te_cv.std(),
         ))
 
-# ---------------------------------------------------------------------------
+# ==========
 # kNN models
-# ---------------------------------------------------------------------------
+# ==========
 knn_rows = []
 
 for k in range(1, 21):
@@ -180,9 +176,9 @@ for k in range(1, 21):
             weights          = weights,
         ))
 
-# ---------------------------------------------------------------------------
-# Write tables
-# ---------------------------------------------------------------------------
+# =====================-===
+# Making Tables for Analysis
+# =========================
 os.makedirs("tables", exist_ok=True)
 
 # 1. Full comparison — one row per configuration, with inline equation
@@ -216,3 +212,12 @@ linear_df[["rmse_test_cv", "r2_test_cv"]] = (
     linear_df[["rmse_test_cv", "r2_test_cv"]].round(5)
 )
 linear_df.to_csv(os.path.join("tables", "poly_linear_equations.csv"), index=False)
+
+# 4. Degree-2 with squares but no cross-terms
+quad_df = results_df[
+    results_df["model"] == "poly_quadratic_no_interactions"
+][["features", "n_expanded", "equation", "rmse_test_cv", "r2_test_cv"]].copy()
+quad_df[["rmse_test_cv", "r2_test_cv"]] = (
+    quad_df[["rmse_test_cv", "r2_test_cv"]].round(5)
+)
+quad_df.to_csv(os.path.join("tables", "poly_quadratic_no_interactions.csv"), index=False)
