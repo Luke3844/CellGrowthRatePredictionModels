@@ -12,7 +12,7 @@ This project produces analyses of various degrees of nearest neighbor and polyno
 - Add rest later
 
 ## Code Design 
-
+First the code imports the relevant packages and scans the dataset from the datasets folder. Then the parameters for the 
 
 ## Analysis
 

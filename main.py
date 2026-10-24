@@ -2,6 +2,7 @@
 # MAIN PROGRAM
 # =====================================================================
 
+## Imports ##
 import os
 
 import numpy as np
@@ -19,6 +20,8 @@ from src.constants import *  # This imports all constants from constants.py
 
 df = pd.read_csv(os.path.join("datasets", "dataset_cell_growth_4factor.csv"))
 
+## Initial Setup ##
+
 ph_optimal = sf.calculate_average(PH_LIMITS)
 temperature_optimal = sf.calculate_average(TEMPERATURE_LIMITS)
 
@@ -28,17 +31,9 @@ batch.display_info()
 features = df.columns[:-1]
 targets = df.columns[-1]
 
-x = df.loc[:, features].to_numpy()
-y = df.loc[:, targets].to_numpy()
+kwargs_gscv = dict(cv=4, scoring="neg_root_mean_squared_error", return_train_score=True)
 
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=0)
+param_grid_poly = dict(polynomialfeatures__degree=[i for i in range(1, 21)])
 
-model = make_pipeline(StandardScaler(), PolynomialFeatures(include_bias = False), LinearRegression())
-
-param_grid = dict(polynomialfeatures__degree=[i for i in range(1, 11)])
-
-model_gscv = GridSearchCV(model, param_grid = param_grid, cv = 4, scoring="neg_root_mean_squared_error", return_train_score=True)
-
-model_gscv.fit(x_train, y_train)
-
-df = pd.DataFrame(model_gscv.cv_results_)
+param_grid_knn = dict(kneighborsregressor__n_neighbors=[i for i in range(1, 11)],
+                      kneighborsregressor__weights=["uniform", "distance"])
