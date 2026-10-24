@@ -5,11 +5,11 @@ This project produces analyses of various degrees of nearest neighbor and polyno
  - Built a program that generates polynomial and kNN model comparisons.
  - Implemented train and test partitioning to ensure consistent evaluation.
  - Learned to analyze model data and distinguish improvements and data or model errors.
- - 
+ - Designed a pipeline to compare the 115 models generated under the same conditions.
+ - Automated result assembly into tidy CSV tables with inline fitted equations.
 
 ## Environment
 - Python 3.13
-- matplotlib 3.11.2
 - numpy 2.5.3
 - pandas 3.0.6
 - scikit-learn 1.9.1
@@ -25,21 +25,26 @@ This stage is necessary because it sets up the functionality for the rest of the
 This section creates a function called make_subsets then takes the features section generated above, and generates all possible combinations of polynomial for the chosen degree.
 For this project I chose 5 as the initial starting point with the intention to increase it if the higher degree models dominated accuracy, but as they were all wildly inaccurate I kept it low.
 This section is necessary for the workflow because it allows us to test all possible combinations of features and degrees for our polynomial regression to determine the best.
+It is later used in the section "Polynomial Models."
 
 ### Table Equation Formatter
 This section creates a function called format_equation which takes the data from the generated polynomials and formats it into a single term for user readability in the table.
 It is not a necessary section for the underlying function of the project and could instead be replaced by columns of each degree and coefficient for each of the polynomials, however this is much more readable. 
 
 ### Polynomial Models
-
+This section fits polynomials to their training data and then tests them against a reserved portion of the data they haven't been trained on all using the sciklearn package and the make_subset function created above.
+This gives us the various polynomial coefficient and degree combinations to choose from for our final model.
+Without this section there would be no polynomials or data with which to compare polynomials and we would be left only comparing kNN regressions or without the data with which to compare our polynomials against each other or against the kNN.
 
 ### kNN Models
-
+Similar to the above section "Polynomial Models" but for k nearest neighbors.
+This section creates kNN models of both distance weighted and uniform weighted types for up to 20 nearest neighbors.
+This creates the models and gives us the data without which we could not compare and therefore choose the most accurate model.
 
 ### Table Generation
 At the end of the code is the table generation, which takes the data generated from the model training and testing and outputs it into a legible format, allowing me (and any interested parties) to analyze the results.
 This stage is necessary because otherwise there would be no way for an interested party to see the results and compare models.
-
+The data from kNN Models and Polynomial Models are sent here so that they can be analyzed.
 
 ## Analysis
 Due to the equation for distance weighting, the test data for the kNN with distance weighting is meaningless as the output is infinite when divided by 0 like in the training.

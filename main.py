@@ -9,8 +9,6 @@ import os
 
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-from matplotlib.ticker import MultipleLocator
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import root_mean_squared_error
 from sklearn.model_selection import cross_validate, train_test_split
