@@ -51,3 +51,7 @@ lc_rmse_knn_train = []
 lc_rmse_poly_test = []
 lc_rmse_knn_test = []
 
+for n_samples in range(18, 318, 10):
+    idxs = rng.choice(len(x_all), size=n_samples, replace=False)
+    x = x_all[idxs]
+    y = y_all[idxs]
