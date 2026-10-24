@@ -40,7 +40,7 @@ x_train, x_test, y_train, y_test = train_test_split(
     x_all, y_all, test_size=0.2, random_state=0)
 
 # ==============
-# Feature subsets
+# Feature subset generation
 # ==============
 def make_subsets(feature_cols, max_degree=5):
     n = len(feature_cols)

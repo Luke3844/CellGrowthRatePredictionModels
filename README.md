@@ -21,7 +21,19 @@ Then it scans the dataset from the datasets folder.
 It then takes the dataset and splits it into target (the first column, the specific growth rate) which becomes y and features (T, pH, glucose, lactate) which becomes x. 
 This stage is necessary because it sets up the functionality for the rest of the code and cuts the dataset into parts that can be read by the model training.
 
-### Feature Subets
+### Feature Subset Generation
+This section creates a function called make_subsets then takes the features section generated above, and generates all possible combinations of polynomial for the chosen degree.
+For this project I chose 5 as the initial starting point with the intention to increase it if the higher degree models dominated accuracy, but as they were all wildly inaccurate I kept it low.
+This section is necessary for the workflow because it allows us to test all possible combinations of features and degrees for our polynomial regression to determine the best.
+
+### Table Equation Formatter
+This section creates a function called format_equation which takes the data from the generated polynomials and formats it into a single term for user readability in the table.
+It is not a necessary section for the underlying function of the project and could instead be replaced by columns of each degree and coefficient for each of the polynomials, however this is much more readable. 
+
+### Polynomial Models
+
+
+### kNN Models
 
 
 ### Table Generation
