@@ -17,6 +17,13 @@ This project produces analyses of various degrees of nearest neighbor and polyno
 ## Analysis
 
 ### Most Accurate Model
+The most accurate model for predicting cell growth is . Reasonable alternatives are . The reason  is better is 
+
+### Conditions For Cell Growth
+High cell growth can be accomplished by .
+
+Inversely, low cell growth can be accomplished by .
 
 
 ### Model Applicability
+
