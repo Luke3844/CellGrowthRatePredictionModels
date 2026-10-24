@@ -52,7 +52,11 @@ Due to the equation for distance weighting, the test data for the kNN with dista
 The most accurate model for predicting cell growth is the distance-weighted kNN with k=10. Reasonable alternatives are other kNN with distance weighting as they all perform above the mean, 
 kNN with k=10 and uniform weighting, as it also performs highly in R2 and RSME for the test values,
 some polynomial models also have high R2, however many higher degree polynomials are severely overfit, with R2 up to -11.
-The reason the chosen model is better is 
+The reason the chosen model is better is that it has the highest cross-validated test R^2 (0.236) and lowest cross validated test RSME (0.155 d^-1).
+However, having the highest or lowest in a category does not necessarily make a model the best choice. 
+As other distance weighted kNN models also sit highly in the most accurate models this suggests that this type of model will be able to accurately predict outcomes for this data.
+Additionally, the second-highest scoring by the above metrics is also a k=10 kNN regression but with uniform instead of distance weight, which would tell us this number of neighbors being factored in is most accurate for our data.
+
 
 ### Conditions For Cell Growth
 Increased cell growth can be accomplished by increasing the concentration of Glucose. 
