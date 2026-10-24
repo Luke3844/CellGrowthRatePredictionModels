@@ -1,0 +1,16 @@
+features,equation,rmse_test_cv,r2_test_cv
+Temperature,+0.2728 -0.0179*[Temperature],0.18156,-0.00966
+pH,+0.2728 -0.0054*[pH],0.1828,-0.0254
+Glucose,+0.2728 +0.0296*[Glucose],0.18159,-0.02047
+Lactate,+0.2728 -0.0530*[Lactate],0.17756,0.01703
+Temperature + pH,+0.2728 -0.0178*[Temperature] -0.0051*[pH],0.18229,-0.01902
+Temperature + Glucose,+0.2728 -0.0173*[Temperature] +0.0293*[Glucose],0.18099,-0.012
+Temperature + Lactate,+0.2728 -0.0144*[Temperature] -0.0521*[Lactate],0.17732,0.02034
+pH + Glucose,+0.2728 -0.0059*[pH] +0.0297*[Glucose],0.18262,-0.03513
+pH + Lactate,+0.2728 -0.0068*[pH] -0.0532*[Lactate],0.17828,0.00629
+Glucose + Lactate,+0.2728 +0.0323*[Glucose] -0.0547*[Lactate],0.17595,0.02179
+Temperature + pH + Glucose,+0.2728 -0.0172*[Temperature] -0.0055*[pH] +0.0294*[Glucose],0.18208,-0.02728
+Temperature + pH + Lactate,+0.2728 -0.0143*[Temperature] -0.0065*[pH] -0.0523*[Lactate],0.1781,0.00892
+Temperature + Glucose + Lactate,+0.2728 -0.0136*[Temperature] +0.0320*[Glucose] -0.0537*[Lactate],0.17574,0.02578
+pH + Glucose + Lactate,+0.2728 -0.0073*[pH] +0.0325*[Glucose] -0.0549*[Lactate],0.1771,0.0033
+Temperature + pH + Glucose + Lactate,+0.2728 -0.0135*[Temperature] -0.0071*[pH] +0.0321*[Glucose] -0.0539*[Lactate],0.17695,0.00668

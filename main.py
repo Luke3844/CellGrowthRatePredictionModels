@@ -2,7 +2,9 @@
 # MAIN PROGRAM
 # =====================================================================
 
+#============
 ## Imports ##
+#============
 import os
 
 import numpy as np
@@ -28,64 +30,189 @@ batch.display_info()
 
 df = pd.read_csv(os.path.join("datasets", "dataset_cell_growth_4factor.csv"))
 
-## Initial Setup ##
+feature_cols = list(df.columns[1:])
+target_col   = df.columns[0]
 
-rng = np.random.default_rng(seed = 1)
+x_all = df.loc[:, feature_cols].to_numpy()
+y_all = df.loc[:, target_col].to_numpy()
 
-features = df.columns[1:]
-targets = df.columns[0]
+x_train, x_test, y_train, y_test = train_test_split(
+    x_all, y_all, test_size=0.2, random_state=0)
 
-x_all = df.loc[:, features].to_numpy()
-y_all = df.loc[:, targets].to_numpy()
+# ---------------------------------------------------------------------------
+# Feature subsets
+# ---------------------------------------------------------------------------
+def make_subsets(feature_cols, max_degree=5):
+    n = len(feature_cols)
+    out = []
+    for i in range(n):
+        out.append(([i], [feature_cols[i]], max_degree))
+    for i in range(n):
+        for j in range(i + 1, n):
+            out.append(([i, j], [feature_cols[i], feature_cols[j]], max_degree))
+    for i in range(n):
+        for j in range(i + 1, n):
+            for k in range(j + 1, n):
+                out.append(([i, j, k],
+                            [feature_cols[i], feature_cols[j], feature_cols[k]],
+                            max_degree))
+    out.append((list(range(n)), feature_cols, max_degree))
+    return out
 
-kwargs_gscv = dict(cv=4, scoring="neg_root_mean_squared_error", return_train_score=True)
+# ---------------------------------------------------------------------------
+# Equation formatter — turns (intercept, coefs, powers) into one string
+# ---------------------------------------------------------------------------
+def format_equation(intercept, coefs, powers, subset_names):
+    """Return the fitted equation as a single-line string, e.g.
+       '0.4167 + 0.0181*[Glucose] + 0.0092*[Lactate] - 0.0234*[Glucose]^2 ...'"""
+    parts = [f"{intercept:+.4f}"]
+    for i in range(powers.shape[0]):
+        term_parts = []
+        for j in range(powers.shape[1]):
+            name = subset_names[j].split(" [")[0]
+            p    = int(powers[i, j])
+            if p == 0:
+                continue
+            elif p == 1:
+                term_parts.append(f"[{name}]")
+            else:
+                term_parts.append(f"[{name}]^{p}")
+        term = " * ".join(term_parts)
+        parts.append(f"{coefs[i]:+.4f}*{term}")
+    return " ".join(parts)
 
-param_grid_poly = dict(polynomialfeatures__degree=[i for i in range(1, 6)])
+# ---------------------------------------------------------------------------
+# Polynomial models
+# ---------------------------------------------------------------------------
+poly_rows = []
 
-param_grid_knn = dict(kneighborsregressor__n_neighbors=[i for i in range(1, 10)],
-                      kneighborsregressor__weights=["uniform", "distance"])
+for subset_idx, subset_names, max_degree in make_subsets(feature_cols, max_degree=5):
+    x_sub_tr = x_train[:, subset_idx]
+    x_sub_te = x_test[:,  subset_idx]
+    feat_label = " + ".join(f.split(" [")[0] for f in subset_names)
 
-## Starting ##
+    for degree in range(1, max_degree + 1):
+        model = make_pipeline(
+            StandardScaler(),
+            PolynomialFeatures(degree=degree, include_bias=False),
+            LinearRegression(),
+        )
 
-lc_n_training_samples = []
-lc_rmse_poly_train = []
-lc_rmse_knn_train = []
-lc_rmse_poly_test = []
-lc_rmse_knn_test = []
+        cv = cross_validate(model, x_train[:, subset_idx], y_train, cv=5,
+                            scoring=("neg_root_mean_squared_error", "r2"),
+                            return_train_score=True)
+        rmse_tr_cv = -cv["train_neg_root_mean_squared_error"]
+        rmse_te_cv = -cv["test_neg_root_mean_squared_error"]
+        r2_tr_cv   =  cv["train_r2"]
+        r2_te_cv   =  cv["test_r2"]
 
-for n_samples in range(38, 318, 20):
-    idxs = rng.choice(len(x_all), size=n_samples, replace=False)
-    x = x_all[idxs]
-    y = y_all[idxs]
+        model.fit(x_sub_tr, y_train)
+        rmse_tr = root_mean_squared_error(y_train, model.predict(x_sub_tr))
+        rmse_te = root_mean_squared_error(y_test,  model.predict(x_sub_te))
 
-    #Splitting data for testing and training
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=0)
+        n_expanded = model["polynomialfeatures"].n_output_features_
 
-    #GSCV for our polynomial models
-    model_poly = make_pipeline(StandardScaler(), PolynomialFeatures(), LinearRegression())
-    model_gscv_poly = GridSearchCV(model_poly, param_grid=param_grid_poly, **kwargs_gscv)
-    model_gscv_poly.fit(x_train, y_train)
+        # Inline the fitted equation as a string
+        powers    = model["polynomialfeatures"].powers_
+        coefs     = model["linearregression"].coef_
+        intercept = model["linearregression"].intercept_
+        equation  = format_equation(intercept, coefs, powers, subset_names)
 
-    #GSCV for knn models
-    model_knn = make_pipeline(StandardScaler(), KNeighborsRegressor())
-    model_gscv_knn = GridSearchCV(model_knn, param_grid = param_grid_knn, **kwargs_gscv)
-    model_gscv_knn.fit(x_train, y_train)
+        poly_rows.append(dict(
+            model            = "poly",
+            features         = feat_label,
+            degree           = degree,
+            n_expanded       = n_expanded,
+            equation         = equation,
+            rmse_train       = rmse_tr,
+            rmse_test        = rmse_te,
+            rmse_train_cv    = rmse_tr_cv.mean(),
+            rmse_train_cv_sd = rmse_tr_cv.std(),
+            rmse_test_cv     = rmse_te_cv.mean(),
+            rmse_test_cv_sd  = rmse_te_cv.std(),
+            r2_train_cv      = r2_tr_cv.mean(),
+            r2_train_cv_sd   = r2_tr_cv.std(),
+            r2_test_cv       = r2_te_cv.mean(),
+            r2_test_cv_sd    = r2_te_cv.std(),
+        ))
 
-    #Training Computing
-    rmse_poly_train = root_mean_squared_error(y_train, model_gscv_poly.predict(x_train))
-    rmse_knn_train = root_mean_squared_error(y_train, model_gscv_knn.predict(x_train))
-    rmse_poly_test = root_mean_squared_error(y_test, model_gscv_poly.predict(x_test))
-    rmse_knn_test = root_mean_squared_error(y_test, model_gscv_knn.predict(x_test))
+# ---------------------------------------------------------------------------
+# kNN models
+# ---------------------------------------------------------------------------
+knn_rows = []
 
-    #Pulling out "Best" Hyperparameters
-    best_degree = model_gscv_poly.best_params_["polynomialfeatures__degree"]
-    best_n_neighbors = model_gscv_knn.best_params_["kneighborsregressor__n_neighbors"]
-    best_weight = model_gscv_knn.best_params_["kneighborsregressor__weights"]
+for k in range(1, 21):
+    for weights in ["uniform", "distance"]:
+        model = make_pipeline(
+            StandardScaler(),
+            KNeighborsRegressor(n_neighbors=k, weights=weights),
+        )
 
-    n_training_samples = x_train.shape[0]
+        cv = cross_validate(model, x_train, y_train, cv=5,
+                            scoring=("neg_root_mean_squared_error", "r2"),
+                            return_train_score=True)
+        rmse_tr_cv = -cv["train_neg_root_mean_squared_error"]
+        rmse_te_cv = -cv["test_neg_root_mean_squared_error"]
+        r2_tr_cv   =  cv["train_r2"]
+        r2_te_cv   =  cv["test_r2"]
 
-    lc_n_training_samples.append(n_training_samples)
-    lc_rmse_poly_train.append(rmse_poly_train)
-    lc_rmse_knn_train.append(rmse_knn_train)
-    lc_rmse_poly_test.append(rmse_poly_test)
-    lc_rmse_knn_test.append(rmse_knn_test)
+        model.fit(x_train, y_train)
+        rmse_tr = root_mean_squared_error(y_train, model.predict(x_train))
+        rmse_te = root_mean_squared_error(y_test,  model.predict(x_test))
+
+        knn_rows.append(dict(
+            model            = "knn",
+            features         = "all",
+            degree           = np.nan,
+            n_expanded       = x_all.shape[1],
+            equation         = "",   # kNN has no closed-form equation
+            rmse_train       = rmse_tr,
+            rmse_test        = rmse_te,
+            rmse_train_cv    = rmse_tr_cv.mean(),
+            rmse_train_cv_sd = rmse_tr_cv.std(),
+            rmse_test_cv     = rmse_te_cv.mean(),
+            rmse_test_cv_sd  = rmse_te_cv.std(),
+            r2_train_cv      = r2_tr_cv.mean(),
+            r2_train_cv_sd   = r2_tr_cv.std(),
+            r2_test_cv       = r2_te_cv.mean(),
+            r2_test_cv_sd    = r2_te_cv.std(),
+            k                = k,
+            weights          = weights,
+        ))
+
+# ---------------------------------------------------------------------------
+# Write tables
+# ---------------------------------------------------------------------------
+os.makedirs("tables", exist_ok=True)
+
+# 1. Full comparison — one row per configuration, with inline equation
+results_df = pd.DataFrame(poly_rows + knn_rows)
+
+column_order = ["model", "features", "degree", "k", "weights", "n_expanded",
+                "equation",
+                "rmse_train", "rmse_test",
+                "rmse_train_cv", "rmse_train_cv_sd",
+                "rmse_test_cv",  "rmse_test_cv_sd",
+                "r2_train_cv",   "r2_train_cv_sd",
+                "r2_test_cv",    "r2_test_cv_sd"]
+results_df = results_df[column_order]
+results_df[results_df.select_dtypes("number").columns] = (
+    results_df.select_dtypes("number").round(5)
+)
+results_df.to_csv(os.path.join("tables", "model_comparison.csv"), index=False)
+
+# 2. Top-10 summary by CV test R²
+top10_df = results_df.nlargest(10, "r2_test_cv")
+top10_df[top10_df.select_dtypes("number").columns] = (
+    top10_df.select_dtypes("number").round(4)
+)
+top10_df.to_csv(os.path.join("tables", "top10_by_r2.csv"), index=False)
+
+# 3. Degree-1 polynomial equations only
+linear_df = results_df[
+    (results_df["model"] == "poly") & (results_df["degree"] == 1)
+][["features", "equation", "rmse_test_cv", "r2_test_cv"]].copy()
+linear_df[["rmse_test_cv", "r2_test_cv"]] = (
+    linear_df[["rmse_test_cv", "r2_test_cv"]].round(5)
+)
+linear_df.to_csv(os.path.join("tables", "poly_linear_equations.csv"), index=False)
