@@ -56,6 +56,7 @@ The reason the chosen model is better is that it has the highest cross-validated
 However, having the highest or lowest in a category does not necessarily make a model the best choice. 
 As other distance weighted kNN models also sit highly in the most accurate models this suggests that this type of model will be able to accurately predict outcomes for this data.
 Additionally, the second-highest scoring by the above metrics is also a k=10 kNN regression but with uniform instead of distance weight, which would tell us this number of neighbors being factored in is most accurate for our data.
+The model is also appealing because as it is not parametric it does not need to assume that our cell growth rate is a smooth combination of our input variables.
 
 
 ### Conditions For Cell Growth
@@ -65,8 +66,11 @@ Which implies a positive increase in specific growth rate in the presence of Glu
 
 Inversely, low cell growth can be accomplished by .
 
+### Possible Model Applications
+The chosen model could be used in the prediction of cell growth rates for design of or operation of a bioreactor system using a cell which metabolized glucose into lactose.
 
-### Model Applicability
+
+### Model Limits
 This model should be applicable for cells which function under similar conditions to those in the dataset used: temperatures from 30-42 degrees celcius, pH from 6-7.8, glucose concentrations from 0-39.9 mM, and Lactate concentrations from 0-40 mM. 
 Many of the polynomial models predict behaviour which is impossible or unlikely outside of this range, for example the higher degree polynomials for glucose predict growth rates in the thousands just outside the data range.
 The kNN may function slightly better at the edges of the existing data but is also expected to quickly lose accuracy once outside of the range of its data points.
