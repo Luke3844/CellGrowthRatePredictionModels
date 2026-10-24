@@ -2,10 +2,9 @@
 This project produces analyses of various degrees of nearest neighbor and polynomial regression models in determining cell growth rates.
 
 ## Highlights
- - Produces polynomial regressions models.
- - Produces k nearest neighbors models.
- - Tests on non-training data for sum of residuals and R squared.
- - Analysis of results featured below.
+ - Built a resuable pipeline that generates polynomial and kNN model comparisons.
+ - Implemented train and test partitioning to ensure consistent evaluation.
+ - Learned to analyze model data and distinguish improvements and data or model errors.
 
 ## Environment 
 - Python 3.14.7
@@ -13,6 +12,8 @@ This project produces analyses of various degrees of nearest neighbor and polyno
 
 ## Code Design 
 First the code imports the relevant packages and scans the dataset from the datasets folder. Then the parameters for the 
+
+At the end is the table generation, which takes the data generated from the model training and testing and outputs it into a legible format, allowing me (and any interested parties) to analyze the results.
 
 ## Analysis
 
